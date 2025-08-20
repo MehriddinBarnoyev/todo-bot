@@ -10,13 +10,12 @@ const completeFlow = require("./commands/complete");
 const deleteFlow = require("./commands/delete");
 
 const bot = new Bot(require("./config").BOT_TOKEN);
-const scheduleReminder = createScheduler(bot); // BONUS: bitta bot instance’dan foyd.
+const scheduleReminder = createScheduler(bot); 
 
 bot.use(session({
   initial: () => ({ step: null, tempTask: {} }),
 }));
 
-// Commands
 bot.command("start", startCommand);
 
 bot.command("add", (ctx) => {
@@ -42,14 +41,11 @@ bot.command("cancel", (ctx) => {
   return ctx.reply("Bekor qilindi. Yangi buyruq kiriting.");
 });
 
-// Faqat step bo‘lganda ishlaydigan umumiy handler
 bot.on("message:text", (ctx) => {
   const text = ctx.message.text || "";
 
-  // 1) Buyruqlarni ("/...") step-flow’dan chetga suramiz:
   if (text.startsWith("/")) return;
 
-  // 2) Step bo‘yicha dispatch
   if (ctx.session.step === "name" || ctx.session.step === "time" || ctx.session.step === "priority") {
     return addFlow(ctx, loadTasks, saveTasks, scheduleReminder);
   }
@@ -59,10 +55,8 @@ bot.on("message:text", (ctx) => {
   if (ctx.session.step === "delete") {
     return deleteFlow(ctx, loadTasks, saveTasks);
   }
-  // Step yo‘q — hech narsa qilmaymiz
 });
 
-// Error handling
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error("Xato:", err.error);
